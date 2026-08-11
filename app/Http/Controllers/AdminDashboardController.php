@@ -43,12 +43,17 @@ class AdminDashboardController extends Controller
         // Recent events
         $recentEvents = UserAnalytic::latest()->take(20)->get();
 
+        // Recent webinar registration orders
+        $recentOrders = \App\Models\Order::latest()->take(20)->get();
+        $totalOrdersCount = \App\Models\Order::count();
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'total_visits' => (int) $counts->total_visits,
                 'total_sessions' => (int) $counts->total_sessions,
                 'total_cta_clicks' => (int) $counts->total_cta_clicks,
                 'total_conversions' => (int) $counts->total_conversions,
+                'total_orders' => $totalOrdersCount,
                 'conversion_rate' => $conversionRate,
                 'avg_engagement_time' => $avgEngagementTime,
             ],
@@ -60,6 +65,7 @@ class AdminDashboardController extends Controller
             ],
             'cta_locations' => $ctaClicksByLocation,
             'recent_events' => $recentEvents,
+            'recent_orders' => $recentOrders,
         ]);
     }
 

@@ -12,6 +12,7 @@ import HeroSection from '../Components/Landing/HeroSection';
 import ClientLogosSection from '../Components/Landing/ClientLogosSection';
 import PainPointsSection from '../Components/Landing/PainPointsSection';
 import RootCauseSection from '../Components/Landing/RootCauseSection';
+import CheckoutModal from '../Components/Landing/CheckoutModal';
 
 // Below-the-Fold components (lazy-loaded via React.lazy for code splitting)
 const ModulesSection = lazy(() => import('../Components/Landing/ModulesSection'));
@@ -38,6 +39,7 @@ const CONVERSION_LOCATIONS = new Set(['hero_cta', 'pricing_cta', 'final_cta']);
 
 export default function Welcome() {
   const { trackEvent } = useAnalytics();
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
 
   // Initialize tracking hooks
   useScrollTracking();
@@ -61,7 +63,7 @@ export default function Welcome() {
   }, []);
 
   /**
-   * Stable CTA Click Handler
+   * Central CTA click handler.
    */
   const handleCtaClick = useCallback(
     (locationId: string) => {
@@ -72,13 +74,8 @@ export default function Welcome() {
         location_id: locationId,
       });
 
-      // Scroll to pricing section for non-pricing CTAs
-      if (locationId !== 'pricing_cta') {
-        const pricingSection = document.getElementById('pricing');
-        if (pricingSection !== null) {
-          pricingSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
+      // Open checkout modal for registration
+      setIsCheckoutOpen(true);
     },
     [trackEvent]
   );
@@ -155,6 +152,12 @@ export default function Welcome() {
       <Suspense fallback={<SectionFallback />}>
         <FooterSection />
       </Suspense>
+
+      {/* Webinar Registration Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+      />
     </div>
   );
 }

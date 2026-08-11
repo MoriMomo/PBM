@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,9 @@ Route::get('/', function () {
 
 // Analytics tracking endpoint (public)
 Route::post('/analytics/track', [AnalyticsController::class, 'track'])->name('analytics.track');
+
+// Checkout Registration endpoint (public)
+Route::post('/checkout/register', [CheckoutController::class, 'register'])->name('checkout.register');
 
 // Admin Analytics & A/B Testing Labs Dashboard
 Route::prefix('admin')->group(function () {

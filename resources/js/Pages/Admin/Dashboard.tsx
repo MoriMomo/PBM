@@ -28,6 +28,7 @@ interface AdminDashboardProps {
     total_sessions: number;
     total_cta_clicks: number;
     total_conversions: number;
+    total_orders?: number;
     conversion_rate: number;
     avg_engagement_time: number;
   };
@@ -46,6 +47,16 @@ interface AdminDashboardProps {
     scroll_depth?: number;
     created_at: string;
   }>;
+  recent_orders?: Array<{
+    id: number;
+    order_number: string;
+    name: string;
+    email: string;
+    whatsapp: string;
+    amount: number;
+    status: string;
+    created_at: string;
+  }>;
 }
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -55,6 +66,7 @@ export default function AdminDashboard({
   scroll_funnel,
   cta_locations,
   recent_events,
+  recent_orders = [],
 }: AdminDashboardProps) {
   const scrollChartData = [
     { depth: '25%', count: scroll_funnel.depth_25 },
@@ -185,6 +197,67 @@ export default function AdminDashboard({
                 No CTA click events recorded yet.
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Webinar Registrations Pendaftar Table */}
+        <div className="bg-slate-900 border border-orange-500/30 rounded-xl overflow-hidden shadow-sm mb-8">
+          <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <span>Daftar Pendaftar Webinar (Total: {stats.total_orders || recent_orders?.length || 0})</span>
+              </h2>
+              <p className="text-xs text-slate-400">Pendaftar real-time yang tersimpan di database dan mengonfirmasi via WA</p>
+            </div>
+            <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full">
+              Rp79.000 / Registration
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-950 text-slate-400 uppercase text-xs border-b border-slate-800 font-mono">
+                <tr>
+                  <th className="px-5 py-3">Kode Order</th>
+                  <th className="px-5 py-3">Nama Lengkap</th>
+                  <th className="px-5 py-3">Email</th>
+                  <th className="px-5 py-3">WhatsApp</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3">Waktu Daftar</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 font-sans">
+                {recent_orders && recent_orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-slate-800/50 transition-colors">
+                    <td className="px-5 py-3.5 font-mono text-xs text-orange-400 font-bold">
+                      {order.order_number}
+                    </td>
+                    <td className="px-5 py-3.5 font-medium text-white">{order.name}</td>
+                    <td className="px-5 py-3.5 text-xs text-slate-300">{order.email}</td>
+                    <td className="px-5 py-3.5 font-mono text-xs text-emerald-400">
+                      <a href={`https://wa.me/${order.whatsapp}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                        <span>{order.whatsapp}</span>
+                      </a>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950 text-amber-300 border border-amber-800 uppercase">
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-xs text-slate-400">
+                      {new Date(order.created_at).toLocaleString('id-ID')}
+                    </td>
+                  </tr>
+                ))}
+                {(!recent_orders || recent_orders.length === 0) && (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-slate-500">
+                      Belum ada pendaftar webinar. Klik tombol "Daftar Sekarang" di landing page untuk menguji pendaftaran pertama!
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
