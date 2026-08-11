@@ -14,7 +14,7 @@ const MODULES = [
     title: 'Diagnosa Kebocoran Funnel Tanpa Tools Mahal',
     description:
       'Cara praktis membaca data visitor landing page kamu. Kamu bakal langsung tahu di mana visitor paling banyak kabur, cukup pakai data dasar tanpa perlu langganan software mahal.',
-    color: 'from-brand-500 to-brand-600',
+    color: 'from-brand-600 to-accent-500',
     highlight: 'Diagnosa Data',
     takeaways: [
       'Cara baca bounce rate & drop-off secara akurat',
@@ -28,7 +28,7 @@ const MODULES = [
     title: 'Cara Menyusun Ulang Headline, Value Prop & CTA',
     description:
       'Panduan praktis menata ulang alur pesan di landing page. Biar visitor yang mendarat merasa paham nilai produkmu dan langsung yakin buat menekan tombol order.',
-    color: 'from-accent-500 to-accent-600',
+    color: 'from-orange-500 to-amber-500',
     highlight: 'Optimasi Konversi',
     takeaways: [
       'Menulis Value Proposition yang jelas & menjual',
@@ -42,7 +42,7 @@ const MODULES = [
     title: 'Bedah Studi Kasus & Template CRO Audit Siap Pakai',
     description:
       'Lihat langsung studi kasus nyata bisnis yang berhasil menaikkan closing 1,5x–2x setelah perbaikan funnel. Lengkap dengan template checklist audit yang bisa langsung kamu pakai.',
-    color: 'from-gold-400 to-gold-500',
+    color: 'from-amber-500 to-yellow-500',
     highlight: 'Studi Kasus & Template',
     takeaways: [
       'Studi kasus nyata peningkatan sales & ROAS',
@@ -54,18 +54,18 @@ const MODULES = [
 
 export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
   return (
-    <section id="modules" className="pt-14 sm:pt-20 pb-6 sm:pb-8 px-4 sm:px-6 relative">
+    <section id="modules" className="py-10 sm:py-14 px-4 sm:px-6 relative">
       <div className="absolute inset-0 bg-dark-900/60 pointer-events-none" />
 
       <div className="relative max-w-5xl mx-auto">
         <SectionReveal>
-          <div className="text-center mb-12 sm:mb-16">
+          <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 bg-gold-500/10 border border-gold-500/20 text-gold-400 px-3.5 py-1.5 rounded-full text-xs font-mono mb-4">
               SILABUS WEBINAR
             </div>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight mb-4">
               Apa Saja Yang Bakal Kamu Pelajari Dalam{' '}
-              <span className="text-gradient-brand">90 Menit</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">90 Menit</span>
             </h2>
             <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
               Materi praktis dari pengalaman ngelola 100+ projek CRO.
@@ -76,7 +76,7 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
 
         {/* Webinar Live Teaser Preview Card */}
         <SectionReveal delay={50}>
-          <div className="mb-10 rounded-3xl overflow-hidden border border-orange-500/30 bg-dark-900/80 p-2 sm:p-3 shadow-2xl relative group">
+          <div className="mb-8 rounded-3xl overflow-hidden border border-orange-500/30 bg-dark-900/80 p-2 sm:p-3 shadow-2xl relative group">
             <div className="relative rounded-2xl overflow-hidden aspect-video">
               <img
                 src="/images/cuplikan-webinar.png"
@@ -99,45 +99,49 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
           </div>
         </SectionReveal>
 
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-5">
           {MODULES.map((mod, index) => {
             const Icon = mod.icon;
             return (
               <SectionReveal key={index} delay={index * 120}>
-                <div className="glass-card glass-card-hover rounded-3xl p-6 sm:p-8 transition-all duration-300 group">
-                  <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-8">
+                <div className="glass-card rounded-3xl p-6 sm:p-7 md:p-8 border border-white/10 transition-all duration-300 group hover:border-orange-500/30">
+                  <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
+                    {/* Module Icon & Badge */}
                     <div className="flex items-center md:flex-col md:items-center gap-3 flex-shrink-0">
                       <div
-                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${mod.color} flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110`}
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${mod.color} flex items-center justify-center shadow-lg shadow-orange-500/20 transition-transform duration-300 group-hover:scale-105`}
                       >
                         <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                       </div>
-                      <span className="font-mono text-xs font-bold text-slate-500 uppercase tracking-widest md:mt-1">
+                      <span className="font-mono text-[11px] font-bold text-slate-400 uppercase tracking-widest md:mt-1">
                         {mod.number}
                       </span>
                     </div>
 
+                    {/* Module Details */}
                     <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
                         <h3 className="font-display text-lg sm:text-xl font-bold text-white leading-snug">
                           {mod.title}
                         </h3>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300 px-2.5 py-1 rounded-full">
+                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1 rounded-full whitespace-nowrap">
                           {mod.highlight}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-400 leading-relaxed mb-4">
+
+                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-5 font-normal">
                         {mod.description}
                       </p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-3 border-t border-white/[0.06]">
+                      {/* Bottom Key Takeaways Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-white/10 items-start">
                         {mod.takeaways.map((item, tIdx) => (
                           <div
                             key={tIdx}
-                            className="flex items-center gap-2 text-xs text-slate-300"
+                            className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
-                            <span>{item}</span>
+                            <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                            <span className="leading-snug">{item}</span>
                           </div>
                         ))}
                       </div>
@@ -151,7 +155,7 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
 
         {/* CTA + Mandatory Social Proof Subtext */}
         <SectionReveal delay={500}>
-          <div className="mt-6 sm:mt-8 text-center">
+          <div className="mt-8 sm:mt-10 text-center">
             <CTAButton
               onClick={onCtaClick}
               size="md"
