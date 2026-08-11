@@ -77,7 +77,7 @@ class CheckoutController extends Controller
         ], 'lead_' . $order->id, $userData);
 
         // Build Admin WhatsApp Redirect Message
-        $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '6285156828464');
+        $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '628111040342');
         
         $message = "Halo Admin PBM Agency, saya *" . $order->name . "* (" . $order->email . ") mau konfirmasi pendaftaran Webinar Bedah Landing Page (Rp79.000).\n\n"
             . "📋 *Kode Order*: " . $orderNumber . "\n"

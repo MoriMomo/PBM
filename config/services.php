@@ -40,4 +40,8 @@ return [
         'access_token' => env('META_ACCESS_TOKEN'),
     ],
 
+    'admin' => [
+        'whatsapp' => env('ADMIN_WHATSAPP_NUMBER', '628111040342'),
+    ],
+
 ];
