@@ -10,7 +10,8 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         
-        <!-- Preload Key Speaker Image -->
+        <!-- Preload Key Hero & Speaker Images for Instant LCP -->
+        <link rel="preload" as="image" href="/images/checklist.webp" type="image/webp" />
         <link rel="preload" as="image" href="/images/justin.jpg" type="image/jpeg" />
 
         <!-- Scripts -->
