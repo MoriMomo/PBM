@@ -42,12 +42,14 @@ export default function CTAButton({
         onClick={onClick}
         className={`
           inline-flex items-center justify-center gap-2.5
+          min-h-[44px]
           ${SIZE_CLASSES[size]}
           ${VARIANT_CLASSES[variant]}
           font-bold rounded-2xl
           transition-all duration-300 ease-out
-          transform hover:-translate-y-0.5 hover:scale-[1.02]
+          transform-gpu hover:-translate-y-0.5 hover:scale-[1.02]
           active:scale-[0.98]
+          focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:ring-offset-2 focus:ring-offset-dark-950
           cursor-pointer
           w-full sm:w-auto
           ${className}
@@ -59,7 +61,7 @@ export default function CTAButton({
       </button>
       {/* Rule 6.7: Explicit conditional rendering */}
       {socialProof ? (
-        <p className="text-xs text-slate-400 font-medium tracking-wide">
+        <p className="text-xs text-slate-300 font-medium tracking-wide">
           {socialProof}
         </p>
       ) : null}

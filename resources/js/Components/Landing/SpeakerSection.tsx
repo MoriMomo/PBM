@@ -85,11 +85,11 @@ export default function SpeakerSection() {
                 </div>
 
                 <p className="text-brand-400 font-mono text-xs font-bold uppercase tracking-wider mb-4">
-                  Founder PBM Agency • 19 Tahun • CRO Practitioner
+                  Founder PBM Agency • 19 Tahun • 5 Thn Digital Business & Web Dev
                 </p>
 
                 <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-                  Fokus membangun website dan landing page yang benar-benar menghasilkan sales, bukan cuma bagus secara visual. Membantu 100+ bisnis mengidentifikasi titik kebocoran di funnel mereka dengan rata-rata kenaikan konversi 1,5x hingga 2x.
+                  Justin Wijaya (19 tahun) memiliki 5 tahun pengalaman di bidang digital business & freelance web development. Berfokus pada Conversion Rate Optimization (CRO) — membangun website yang benar-benar menjual, bukan cuma enak dilihat. Klien PBM Agency rata-rata mengalami kenaikan konversi 1,5x hingga 2x.
                 </p>
 
                 {/* Credentials grid */}

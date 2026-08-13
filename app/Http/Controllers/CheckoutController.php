@@ -33,13 +33,13 @@ class CheckoutController extends Controller
         // Normalize WhatsApp phone number to international format (628...)
         $phone = preg_replace('/[^0-9]/', '', $validated['whatsapp']);
         if (str_starts_with($phone, '08')) {
-            $phone = '628' . substr($phone, 2);
+            $phone = '628'.substr($phone, 2);
         } elseif (str_starts_with($phone, '8')) {
-            $phone = '628' . substr($phone, 1);
+            $phone = '628'.substr($phone, 1);
         }
 
         // Generate unique order number
-        $orderNumber = 'PBM-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+        $orderNumber = 'PBM-'.date('Ymd').'-'.strtoupper(Str::random(4));
 
         // Save order to database
         $order = Order::create([
@@ -64,7 +64,7 @@ class CheckoutController extends Controller
         ];
 
         // Send CAPI InitiateCheckout & Lead events
-        $eventId = 'reg_' . $order->id . '_' . time();
+        $eventId = 'reg_'.$order->id.'_'.time();
         $this->capiService->sendEvent('InitiateCheckout', [
             'value' => 79000.00,
             'currency' => 'IDR',
@@ -74,18 +74,18 @@ class CheckoutController extends Controller
 
         $this->capiService->sendEvent('Lead', [
             'content_name' => 'Webinar Registration',
-        ], 'lead_' . $order->id, $userData);
+        ], 'lead_'.$order->id, $userData);
 
         // Build Admin WhatsApp Redirect Message
         $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '628111040342');
-        
-        $message = "Halo Admin PBM Agency, saya *" . $order->name . "* (" . $order->email . ") mau konfirmasi pendaftaran Webinar Bedah Landing Page (Rp79.000).\n\n"
-            . "📋 *Kode Order*: " . $orderNumber . "\n"
-            . "📱 *WhatsApp*: " . $phone . "\n"
-            . "💰 *Total Investasi*: Rp79.000\n\n"
-            . "Mohon info instruksi pembayaran QRIS / Rekening Bank. Terima kasih!";
 
-        $whatsappUrl = "https://api.whatsapp.com/send?phone={$adminPhone}&text=" . urlencode($message);
+        $message = 'Halo Admin PBM Agency, saya *'.$order->name.'* ('.$order->email.") mau konfirmasi pendaftaran Webinar Bedah Landing Page (Rp79.000).\n\n"
+            .'📋 *Kode Order*: '.$orderNumber."\n"
+            .'📱 *WhatsApp*: '.$phone."\n"
+            ."💰 *Total Investasi*: Rp79.000\n\n"
+            .'Mohon info instruksi pembayaran QRIS / Rekening Bank. Terima kasih!';
+
+        $whatsappUrl = "https://api.whatsapp.com/send?phone={$adminPhone}&text=".urlencode($message);
 
         return response()->json([
             'success' => true,

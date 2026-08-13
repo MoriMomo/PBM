@@ -21,10 +21,10 @@ const BONUSES = [
   },
   {
     icon: BookOpen,
-    title: 'Ebook Panduan "Pembedahan Konversi Landing Page"',
+    title: 'Ebook "Iklan Sudah Jalan, Tapi Kok Tetap Boncos?"',
     description:
-      'Buku panduan digital pendamping webinar berisi acuan langkah demi langkah memperbaiki copywriting, offer, dan alur konversi landing page.',
-    tag: 'Ebook Eksklusif',
+      'Ebook pelengkap panduan digital pendamping webinar berisi materi praktik memperbaiki konversi & alur penawaran di landing page.',
+    tag: 'Ebook Pelengkap',
     color: 'text-accent-400',
     bgColor: 'bg-accent-500/10',
     value: 'Value: Rp99.000',

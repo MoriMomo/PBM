@@ -31,7 +31,7 @@ export default function FooterSection() {
         </div>
 
         {/* Footer Nav Links */}
-        <div className="flex flex-wrap items-center gap-5 text-xs text-slate-400">
+        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs text-slate-400">
           {NAV_FOOTER_LINKS.map((link) => (
             <a
               key={link.href}

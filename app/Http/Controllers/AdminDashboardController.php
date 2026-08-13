@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\UserAnalytic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class AdminDashboardController extends Controller
 
         $totalSessions = $counts->total_sessions ?? 0;
         $totalConversions = $counts->total_conversions ?? 0;
-        
+
         $conversionRate = $totalSessions > 0 ? round(($totalConversions / $totalSessions) * 100, 2) : 0;
         $avgEngagementTime = round((float) ($counts->avg_engagement ?? 0), 1);
 
@@ -44,8 +45,8 @@ class AdminDashboardController extends Controller
         $recentEvents = UserAnalytic::latest()->take(20)->get();
 
         // Recent webinar registration orders
-        $recentOrders = \App\Models\Order::latest()->take(20)->get();
-        $totalOrdersCount = \App\Models\Order::count();
+        $recentOrders = Order::latest()->take(20)->get();
+        $totalOrdersCount = Order::count();
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -83,8 +84,8 @@ class AdminDashboardController extends Controller
                     'variant_a' => ['name' => 'Original Headline', 'visits' => 120, 'conversions' => 18, 'rate' => 15.0],
                     'variant_b' => ['name' => 'CRO Optimized Headline', 'visits' => 125, 'conversions' => 26, 'rate' => 20.8],
                     'winner' => 'Variant B (+5.8%)',
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 }

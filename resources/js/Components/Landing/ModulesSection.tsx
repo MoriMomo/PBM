@@ -11,43 +11,43 @@ const MODULES = [
   {
     number: 'MODUL 01',
     icon: Search,
-    title: 'Diagnosa Kebocoran Funnel Tanpa Tools Mahal',
+    title: 'Cara Membaca Letak Masalah Funnel',
     description:
-      'Cara praktis membaca data visitor landing page kamu. Kamu bakal langsung tahu di mana visitor paling banyak kabur, cukup pakai data dasar tanpa perlu langganan software mahal.',
+      'Menemukan di mana letak masalah yang membuat traffic terbuang sia-sia selama ini. Kamu akan belajar membaca data dasar visitor landing page untuk langsung menemukan lokasi kebocoran.',
     color: 'from-brand-600 to-accent-500',
-    highlight: 'Diagnosa Data',
+    highlight: 'Diagnosa Masalah',
     takeaways: [
-      'Cara baca bounce rate & drop-off secara akurat',
-      'Format diagnosa cepat 15 menit',
-      'Membedakan masalah iklan vs landing page',
+      'Menemukan titik kebocoran traffic secara presisi',
+      'Format membaca data visitor tanpa tebak-tebakan',
+      'Membedakan masalah iklan vs masalah landing page',
     ],
   },
   {
     number: 'MODUL 02',
     icon: Wrench,
-    title: 'Cara Menyusun Ulang Headline, Value Prop & CTA',
+    title: 'Cara Efektif Perbaiki Kebocoran Landing Page',
     description:
-      'Panduan praktis menata ulang alur pesan di landing page. Biar visitor yang mendarat merasa paham nilai produkmu dan langsung yakin buat menekan tombol order.',
+      'Framework praktis untuk memperbaiki kebocoran funnel. Menata ulang alur pesan, headline, value proposition, dan CTA agar halaman mendorong visitor untuk makin yakin membeli.',
     color: 'from-orange-500 to-amber-500',
-    highlight: 'Optimasi Konversi',
+    highlight: 'Framework Perbaikan',
     takeaways: [
-      'Menulis Value Proposition yang jelas & menjual',
-      'Formula perbaikan Call-to-Action (CTA)',
-      'Mengurangi hambatan di proses checkout',
+      'Menyusun ulang Headline, Value Prop & CTA',
+      'Alur pesan yang menepis keraguan calon pembeli',
+      'Formula mengurangi friksi di proses checkout',
     ],
   },
   {
     number: 'MODUL 03',
     icon: FlaskConical,
-    title: 'Bedah Studi Kasus & Template CRO Audit Siap Pakai',
+    title: 'Bedah Studi Kasus & Tools Diagnosis Kebocoran',
     description:
-      'Lihat langsung studi kasus nyata bisnis yang berhasil menaikkan closing 1,5x–2x setelah perbaikan funnel. Lengkap dengan template checklist audit yang bisa langsung kamu pakai.',
+      'Bedah studi kasus nyata cara diagnosa & perbaiki kebocoran landing page bisnis alumni/klien, serta penggunaan tools diagnosa kebocoran konversi yang siap kamu pakai.',
     color: 'from-amber-500 to-yellow-500',
-    highlight: 'Studi Kasus & Template',
+    highlight: 'Studi Kasus & Tools',
     takeaways: [
-      'Studi kasus nyata peningkatan sales & ROAS',
-      'Checklist audit CRO siap pakai',
-      'Rekomendasi tools CRO gratisan berkualitas',
+      'Bedah studi kasus nyata kenaikan konversi 1,5–2x',
+      'Demo tools diagnosa kebocoran konversi',
+      'Template checklist audit yang langsung bisa dipakai',
     ],
   },
 ] as const;
@@ -76,25 +76,25 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
 
         {/* Webinar Live Teaser Preview Card */}
         <SectionReveal delay={50}>
-          <div className="mb-8 rounded-3xl overflow-hidden border border-orange-500/30 bg-dark-900/80 p-2 sm:p-3 shadow-2xl relative group">
-            <div className="relative rounded-2xl overflow-hidden aspect-video">
+          <div className="mb-8 rounded-3xl overflow-hidden border border-orange-500/30 bg-dark-900/90 p-2.5 sm:p-4 shadow-2xl group">
+            <div className="rounded-2xl overflow-hidden relative shadow-lg">
               <img
                 src="/images/cuplikan-webinar.png"
                 alt="Cuplikan Sesi Live Webinar Pembedahan Landing Page"
-                className="w-full h-full object-cover transform group-hover:scale-102 transition-transform duration-500"
+                className="w-full h-auto object-cover transform group-hover:scale-[1.01] transition-transform duration-500 rounded-2xl"
                 loading="lazy"
                 decoding="async"
                 width={900}
                 height={506}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-dark-950/20 to-transparent flex flex-col justify-end p-6">
-                <span className="inline-flex items-center gap-2 bg-brand-600 text-white text-xs font-mono font-bold px-3 py-1 rounded-full w-fit mb-2 shadow-lg">
-                  🔴 CUPLIKAN SESI LIVE WEBINAR
-                </span>
-                <h3 className="font-display text-lg sm:text-xl font-bold text-white">
-                  Bedah Kasus Real-Time & Pembedahan Anatomi Funnel Landing Page
-                </h3>
-              </div>
+            </div>
+            <div className="mt-3 p-3.5 sm:p-4 rounded-2xl bg-dark-950/80 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 bg-brand-600/90 text-white text-[11px] font-mono font-bold px-3 py-1 rounded-full shadow w-fit">
+                🔴 CUPLIKAN SESI LIVE WEBINAR
+              </span>
+              <h3 className="font-display text-xs sm:text-base font-bold text-white leading-snug">
+                Bedah Kasus Real-Time & Pembedahan Anatomi Funnel Landing Page
+              </h3>
             </div>
           </div>
         </SectionReveal>
@@ -104,16 +104,16 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
             const Icon = mod.icon;
             return (
               <SectionReveal key={index} delay={index * 120}>
-                <div className="glass-card rounded-3xl p-6 sm:p-7 md:p-8 border border-white/10 transition-all duration-300 group hover:border-orange-500/30">
+                <div className="glass-card rounded-3xl p-6 sm:p-7 md:p-8 border border-white/10 transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/10 group hover:border-orange-500/40">
                   <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
                     {/* Module Icon & Badge */}
                     <div className="flex items-center md:flex-col md:items-center gap-3 flex-shrink-0">
                       <div
-                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${mod.color} flex items-center justify-center shadow-lg shadow-orange-500/20 transition-transform duration-300 group-hover:scale-105`}
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${mod.color} flex items-center justify-center shadow-lg shadow-orange-500/20 transition-transform duration-300 group-hover:scale-105 transform-gpu`}
                       >
                         <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                       </div>
-                      <span className="font-mono text-[11px] font-bold text-slate-400 uppercase tracking-widest md:mt-1">
+                      <span className="font-mono text-[11px] font-bold text-slate-300 uppercase tracking-widest md:mt-1">
                         {mod.number}
                       </span>
                     </div>
@@ -129,7 +129,7 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
                         </span>
                       </div>
 
-                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-5 font-normal">
+                      <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-5 font-normal">
                         {mod.description}
                       </p>
 
@@ -138,7 +138,7 @@ export default function ModulesSection({ onCtaClick }: ModulesSectionProps) {
                         {mod.takeaways.map((item, tIdx) => (
                           <div
                             key={tIdx}
-                            className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300"
+                            className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200"
                           >
                             <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
                             <span className="leading-snug">{item}</span>

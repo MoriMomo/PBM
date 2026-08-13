@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class MetaCapiService
 {
     protected string $pixelId;
+
     protected string $accessToken;
 
     public function __construct()
@@ -41,25 +42,27 @@ class MetaCapiService
                         'client_user_agent' => request()->userAgent(),
                     ], $userData),
                     'custom_data' => $customData,
-                ]
+                ],
             ],
             'access_token' => $this->accessToken,
         ];
 
         try {
             $response = Http::post($url, $payload);
-            
+
             if ($response->failed()) {
                 Log::error('Meta CAPI Request Failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Meta CAPI Exception: ' . $e->getMessage());
+            Log::error('Meta CAPI Exception: '.$e->getMessage());
+
             return false;
         }
     }

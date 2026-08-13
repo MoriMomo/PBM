@@ -46,8 +46,8 @@ class AnalyticsController extends Controller
         ]);
 
         // Dual Tracking with Meta CAPI
-        $eventId = $validated['event_id'] ?? 'evt_' . Str::random(10);
-        
+        $eventId = $validated['event_id'] ?? 'evt_'.Str::random(10);
+
         if ($validated['event_type'] === 'visit') {
             $this->capiService->sendEvent('PageView', [], $eventId);
         } elseif ($validated['event_type'] === 'conversion' || ($validated['event_type'] === 'cta_click' && ($validated['location_id'] ?? '') === 'pricing_cta')) {

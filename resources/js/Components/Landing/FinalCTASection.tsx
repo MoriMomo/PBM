@@ -37,7 +37,7 @@ export default function FinalCTASection({ onCtaClick }: FinalCTASectionProps) {
               onClick={onCtaClick}
               size="lg"
               id="final-cta-btn"
-              socialProof="⭐ Diikuti 100+ Pemilik Bisnis • Rating 4,9/5 • Garansi 100% Uang Kembali"
+              socialProof="⭐ Dipercaya 100+ Bisnis • Rating 4,9/5 • Garansi Kepuasan Sesi 100%"
             >
               Ikut Webinar & Perbaiki LP Saya
             </CTAButton>

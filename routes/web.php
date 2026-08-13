@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -40,4 +40,3 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
-
