@@ -44,8 +44,9 @@ export default function FAQSection() {
   }, []);
 
   return (
-    <section id="faq" className="py-10 sm:py-14 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto">
+    <section id="faq" className="py-10 sm:py-14 px-4 sm:px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-dark-950/90 pointer-events-none" />
+      <div className="relative max-w-3xl mx-auto z-10">
         <SectionReveal>
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase mb-3">

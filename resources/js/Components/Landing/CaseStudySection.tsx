@@ -82,8 +82,9 @@ export default function CaseStudySection() {
   };
 
   return (
-    <section id="case-study" className="py-10 sm:py-14 px-4 sm:px-6 relative">
-      <div className="max-w-5xl mx-auto">
+    <section id="case-study" className="py-10 sm:py-14 px-4 sm:px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-dark-950/40 pointer-events-none" />
+      <div className="relative max-w-5xl mx-auto z-10">
         <SectionReveal>
           <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full text-xs font-mono mb-4">
@@ -91,7 +92,7 @@ export default function CaseStudySection() {
               BUKTI HASIL CRO NYATA
             </div>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight mb-4">
-              Studi Kasus: Pembedahan Landing Page Klien
+              Studi Kasus: <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Pembedahan Landing Page Klien</span>
             </h2>
             <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
               Lihat langsung transformasi landing page dari versi awal yang sepi konversi menjadi versi teroptimasi yang menghasilkan kenaikan sales hingga 2x lipat.
