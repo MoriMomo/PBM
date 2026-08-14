@@ -45,19 +45,21 @@ class AnalyticsController extends Controller
             'meta_data' => $validated['meta_data'] ?? null,
         ]);
 
-        // Dual Tracking with Meta CAPI
+        // Dual Tracking with Meta CAPI - deferred to the termination phase to prevent blocking the response
         $eventId = $validated['event_id'] ?? 'evt_'.Str::random(10);
 
-        if ($validated['event_type'] === 'visit') {
-            $this->capiService->sendEvent('PageView', [], $eventId);
-        } elseif ($validated['event_type'] === 'conversion' || ($validated['event_type'] === 'cta_click' && ($validated['location_id'] ?? '') === 'pricing_cta')) {
-            $coursePrice = env('VITE_COURSE_PRICE', 0);
-            $this->capiService->sendEvent('AddToCart', [
-                'currency' => 'IDR',
-                'value' => (float) $coursePrice,
-                'content_name' => 'Landing Page CTA Conversion',
-            ], $eventId);
-        }
+        app()->terminating(function () use ($validated, $eventId) {
+            if ($validated['event_type'] === 'visit') {
+                $this->capiService->sendEvent('PageView', [], $eventId);
+            } elseif ($validated['event_type'] === 'conversion' || ($validated['event_type'] === 'cta_click' && ($validated['location_id'] ?? '') === 'pricing_cta')) {
+                $coursePrice = env('VITE_COURSE_PRICE', 0);
+                $this->capiService->sendEvent('AddToCart', [
+                    'currency' => 'IDR',
+                    'value' => (float) $coursePrice,
+                    'content_name' => 'Landing Page CTA Conversion',
+                ], $eventId);
+            }
+        });
 
         return response()->json([
             'success' => true,

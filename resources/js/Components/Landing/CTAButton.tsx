@@ -20,7 +20,7 @@ const SIZE_CLASSES: Record<string, string> = {
 
 const VARIANT_CLASSES: Record<string, string> = {
   primary:
-    'bg-gradient-to-r from-brand-600 to-accent-500 hover:from-brand-500 hover:to-accent-400 text-white shadow-xl shadow-brand-600/25 animate-pulse-glow',
+    'bg-gradient-to-r from-brand-600 to-accent-500 hover:from-brand-500 hover:to-accent-400 text-white pulse-glow-btn',
   secondary:
     'bg-dark-700 hover:bg-dark-600 text-white border border-white/10 hover:border-white/20',
 };

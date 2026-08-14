@@ -10,9 +10,12 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         
-        <!-- Preload Key Hero & Speaker Images for Instant LCP -->
-        <link rel="preload" as="image" href="/images/checklist.webp" type="image/webp" />
-        <link rel="preload" as="image" href="/images/justin.jpg" type="image/jpeg" />
+        <!-- Preload Key Hero Image for Instant LCP -->
+        <link rel="preload" as="image" href="/images/checklist.webp" type="image/webp" fetchpriority="high" />
+
+        <!-- Preload Critical WOFF2 Fonts to prevent rendering delays on mobile -->
+        <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVnskPMA.woff2" as="font" type="font/woff2" crossorigin>
 
         <!-- Scripts -->
         @routes

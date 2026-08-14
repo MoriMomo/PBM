@@ -1,56 +1,36 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────
-   Inline Font Face Definitions (Zero external CSS roundtrip)
+   Optimized Latin WOFF2 Font Face Definitions
    ────────────────────────────────────────────── */
+/* Inter Latin (400, 600, 700, 800) */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 800;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf) format('truetype');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf) format('truetype');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf) format('truetype');
-}
+
+/* JetBrains Mono Latin (500, 700) */
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 500 700;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8-qxjPQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8L6tjPQ.ttf) format('truetype');
-}
+
+/* Space Grotesk Latin (700) */
 @font-face {
   font-family: 'Space Grotesk';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVnskPMA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* ──────────────────────────────────────────────
@@ -94,7 +74,6 @@
   /* Keyframe Animations */
   --animate-fade-in: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-pulse-glow: pulse-glow 2.5s ease-in-out infinite;
   --animate-float: float 4s ease-in-out infinite;
   --animate-shimmer: shimmer 3s linear infinite;
   --animate-pulse-subtle: pulse-subtle 3s ease-in-out infinite;
@@ -111,12 +90,35 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-glow {
+.pulse-glow-btn {
+  position: relative;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2), 0 0 30px rgba(234, 88, 12, 0.1);
+  z-index: 1;
+}
+
+.pulse-glow-btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.5), 0 0 60px rgba(234, 88, 12, 0.25);
+  opacity: 0.4;
+  z-index: -1;
+  animation: pulse-glow-opacity 2.5s ease-in-out infinite;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.pulse-glow-btn:hover::after {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+@keyframes pulse-glow-opacity {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.25), 0 0 40px rgba(234, 88, 12, 0.12);
+    opacity: 0.3;
   }
   50% {
-    box-shadow: 0 0 35px rgba(239, 68, 68, 0.45), 0 0 70px rgba(234, 88, 12, 0.25);
+    opacity: 0.85;
   }
 }
 

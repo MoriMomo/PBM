@@ -9,31 +9,12 @@ import { initClarity } from '../Services/clarity';
 // Critical Above-the-Fold components (loaded synchronously for fast LCP/FCP)
 import Navbar from '../Components/Landing/Navbar';
 import HeroSection from '../Components/Landing/HeroSection';
-import ClientLogosSection from '../Components/Landing/ClientLogosSection';
-import PainPointsSection from '../Components/Landing/PainPointsSection';
-import RootCauseSection from '../Components/Landing/RootCauseSection';
 import CheckoutModal from '../Components/Landing/CheckoutModal';
 
-// Below-the-Fold components (lazy-loaded via React.lazy for code splitting)
-const ModulesSection = lazy(() => import('../Components/Landing/ModulesSection'));
-const BonusSection = lazy(() => import('../Components/Landing/BonusSection'));
-const SpeakerSection = lazy(() => import('../Components/Landing/SpeakerSection'));
-const CaseStudySection = lazy(() => import('../Components/Landing/CaseStudySection'));
-const TestimonialsSection = lazy(() => import('../Components/Landing/TestimonialsSection'));
-const PricingSection = lazy(() => import('../Components/Landing/PricingSection'));
-const FAQSection = lazy(() => import('../Components/Landing/FAQSection'));
-const FinalCTASection = lazy(() => import('../Components/Landing/FinalCTASection'));
-const FooterSection = lazy(() => import('../Components/Landing/FooterSection'));
-
-// Hoist static JSX divider element outside component to avoid allocations
-const SECTION_DIVIDER = (
-  <div className="max-w-6xl mx-auto px-6">
-    <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-  </div>
+// Consolidated Below-the-Fold chunk (lazy-loaded as a SINGLE chunk to prevent main-thread TBT blocking and eliminate HTTP/1.1 waterfall)
+const BelowTheFoldSections = lazy(
+  () => import('../Components/Landing/BelowTheFoldSections')
 );
-
-// Lightweight fallback placeholder for lazy-loaded sections
-const SectionFallback = () => <div className="min-h-[150px] w-full" />;
 
 const CONVERSION_LOCATIONS = new Set(['hero_cta', 'pricing_cta', 'final_cta']);
 
@@ -57,7 +38,7 @@ export default function Welcome() {
         initMetaPixel();
         initClarity();
       }
-    }, 2000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -110,48 +91,23 @@ export default function Welcome() {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Navbar */}
+      {/* Navbar - Critical above-the-fold */}
       <Navbar onCtaClick={handleNavbarCta} />
 
       {/* Main Landmark Area for Accessibility & SEO */}
       <main id="main-content" role="main">
-        {/* Hero Section */}
+        {/* Hero Section - Synchronous, zero delay, instant FCP/LCP paint */}
         <HeroSection onCtaClick={handleHeroCta} />
 
-        {/* Client Trust Flash Logos Banner (Reference: pbmagency.id) */}
-        <ClientLogosSection />
-
-        {SECTION_DIVIDER}
-
-        {/* Pain Points Section */}
-        <PainPointsSection />
-
-        {/* Root Cause Section */}
-        <RootCauseSection />
-
-        {SECTION_DIVIDER}
-
-        {/* Below-the-Fold Lazy Loaded Sections */}
-        <Suspense fallback={<SectionFallback />}>
-          <ModulesSection onCtaClick={handleModulesCta} />
-          <BonusSection />
-          <SpeakerSection />
-        </Suspense>
-
-        {SECTION_DIVIDER}
-
-        <Suspense fallback={<SectionFallback />}>
-          <CaseStudySection />
-          <TestimonialsSection />
-          <PricingSection onCtaClick={handlePricingCta} />
-          <FAQSection />
-          <FinalCTASection onCtaClick={handleFinalCta} />
+        {/* Consolidated Below-the-Fold sections */}
+        <Suspense fallback={<div className="min-h-[600px] w-full" />}>
+          <BelowTheFoldSections
+            onModulesCta={handleModulesCta}
+            onPricingCta={handlePricingCta}
+            onFinalCta={handleFinalCta}
+          />
         </Suspense>
       </main>
-
-      <Suspense fallback={<SectionFallback />}>
-        <FooterSection />
-      </Suspense>
 
       {/* Webinar Registration Checkout Modal */}
       <CheckoutModal

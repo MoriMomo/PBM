@@ -61,7 +61,7 @@ export default function SpeakerSection() {
               <div className="flex-shrink-0 relative">
                 <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-3xl overflow-hidden border-2 border-orange-500/40 shadow-2xl shadow-orange-500/20 relative">
                   <img
-                    src="/images/justin.jpg"
+                    src="/images/justin.webp"
                     alt="Justin Wijaya, Founder PBM Agency & CRO Specialist"
                     className="w-full h-full object-cover"
                     loading="lazy"
