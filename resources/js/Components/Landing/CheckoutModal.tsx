@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, User, Mail, Phone, ShieldCheck, ArrowRight, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { trackPixelEvent } from '../../Services/metaPixel';
+import { useAnalytics } from '../../Hooks/useAnalytics';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface CheckoutModalProps {
 }
 
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
+  const { trackEvent } = useAnalytics();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -46,6 +48,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       });
 
       if (response.data?.success && response.data?.whatsapp_url) {
+        // Track first-party conversion event
+        trackEvent({
+          event_type: 'conversion',
+          location_id: 'checkout_modal',
+        });
+
         // Redirect to WhatsApp Admin
         window.open(response.data.whatsapp_url, '_blank');
         onClose();

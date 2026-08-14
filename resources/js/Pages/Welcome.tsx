@@ -48,10 +48,8 @@ export default function Welcome() {
    */
   const handleCtaClick = useCallback(
     (locationId: string) => {
-      const isConversion = CONVERSION_LOCATIONS.has(locationId);
-
       trackEvent({
-        event_type: isConversion ? 'conversion' : 'cta_click',
+        event_type: 'cta_click',
         location_id: locationId,
       });
 
