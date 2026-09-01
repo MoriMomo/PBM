@@ -11,35 +11,64 @@ class DuitkuController extends Controller
 {
     /**
      * Handle Duitku Payment Notification / Callback
+     * Docs: https://docs.duitku.com/api/id/?php#callback
+     *
+     * Callback signature formula (Duitku API v2):
+     *   $stringToSign = $merchantCode . $amount . $merchantOrderId . $apiKey;
+     *   $signature = hash_hmac('sha256', $stringToSign, $apiKey);
      */
     public function callback(Request $request): JsonResponse
     {
-        $apiKey = env('DUITKU_API_KEY', '1c9e7b636968f30614f3c4824d1851e8');
+        $apiKey = trim(
+            config('services.duitku.api_key')
+            ?: (getenv('DUITKU_API_KEY')
+            ?: ($_ENV['DUITKU_API_KEY']
+            ?: ($_SERVER['DUITKU_API_KEY'] ?? '')))
+        );
+
         $merchantCode = $request->input('merchantCode');
         $amount = $request->input('amount');
         $merchantOrderId = $request->input('merchantOrderId');
         $signature = $request->input('signature');
         $resultCode = $request->input('resultCode');
 
-        // Verify Duitku v2 signature: HMAC-SHA256(merchantCode + amount + merchantOrderId, apiKey)
-        $stringToSign = $merchantCode . $amount . $merchantOrderId;
+        Log::info('Duitku Callback Received', [
+            'merchantCode' => $merchantCode,
+            'merchantOrderId' => $merchantOrderId,
+            'amount' => $amount,
+            'resultCode' => $resultCode,
+        ]);
+
+        // Verify Duitku API v2 callback signature
+        // Formula: hash_hmac('sha256', merchantCode + amount + merchantOrderId + apiKey, apiKey)
+        $stringToSign = $merchantCode . $amount . $merchantOrderId . $apiKey;
         $calcSignature = hash_hmac('sha256', $stringToSign, $apiKey);
 
         if ($signature && $signature !== $calcSignature) {
-            Log::warning('Duitku callback signature mismatch', ['received' => $signature, 'calculated' => $calcSignature]);
+            Log::warning('Duitku callback signature mismatch', [
+                'received' => $signature,
+                'calculated' => $calcSignature,
+                'stringToSign' => $merchantCode . $amount . $merchantOrderId . '***',
+            ]);
             return response()->json(['status' => 'Bad Signature'], 400);
         }
 
-        // If resultCode == '00', payment success
+        // resultCode '00' = Payment Success
         if ($resultCode === '00') {
             Order::where('order_number', $merchantOrderId)->update([
                 'status' => 'paid',
             ]);
-            Log::info("Duitku Payment Success for Order: {$merchantOrderId}");
+            Log::info("Duitku Payment SUCCESS for Order: {$merchantOrderId}, Amount: {$amount}");
+        } elseif ($resultCode === '01') {
+            Log::info("Duitku Payment PENDING for Order: {$merchantOrderId}");
         } else {
-            Log::info("Duitku Payment Pending/Failed ({$resultCode}) for Order: {$merchantOrderId}");
+            Order::where('order_number', $merchantOrderId)->update([
+                'status' => 'failed',
+            ]);
+            Log::info("Duitku Payment FAILED ({$resultCode}) for Order: {$merchantOrderId}");
         }
 
+        // Duitku requires HTTP 200 response
         return response()->json(['status' => 'SUCCESS'], 200);
     }
 

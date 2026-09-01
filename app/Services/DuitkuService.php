@@ -30,13 +30,20 @@ class DuitkuService
             config('services.duitku.api_key') 
             ?: (getenv('DUITKU_API_KEY') 
             ?: ($_ENV['DUITKU_API_KEY'] 
-            ?: ($_SERVER['DUITKU_API_KEY'] ?? '1c9e7b636968f30614f3c4824d1851e8')))
+            ?: ($_SERVER['DUITKU_API_KEY'] ?? '')))
         );
     }
 
     /**
-     * Create Invoice / Payment URL using Duitku POP API (createInvoice)
-     * Docs: https://docs.duitku.com/pop/id/?php#pendahuluan
+     * Create Invoice using Duitku API v2 (Permintaan Transaksi / Inquiry)
+     * Docs: https://docs.duitku.com/api/id/?php#permintaan-transaksi
+     *
+     * Endpoint Production: https://passport.duitku.com/webapi/api/merchant/v2/inquiry
+     * Endpoint Sandbox:    https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry
+     *
+     * Signature formula:
+     *   $stringToSign = $merchantCode . $merchantOrderId . $paymentAmount . $apiKey;
+     *   $signature = hash_hmac('sha256', $stringToSign, $apiKey);
      */
     public function createInvoice(array $params): ?string
     {
@@ -44,47 +51,47 @@ class DuitkuService
         $apiKey = $this->getApiKey();
 
         if (empty($merchantCode)) {
-            $this->lastError = 'DUITKU_MERCHANT_CODE is empty in environment variables.';
+            $this->lastError = 'DUITKU_MERCHANT_CODE is empty. Set it in Vercel environment variables.';
             Log::info($this->lastError);
             return null;
         }
 
-        $merchantOrderId = $params['order_id'];
+        if (empty($apiKey)) {
+            $this->lastError = 'DUITKU_API_KEY is empty. Set it in Vercel environment variables.';
+            Log::info($this->lastError);
+            return null;
+        }
+
+        $merchantOrderId = (string) $params['order_id'];
         $paymentAmount = (int) $params['amount'];
         $email = trim($params['email']);
         $phoneNumber = trim($params['phone']);
         $customerName = trim($params['name']);
         $productDetails = $params['product_name'] ?? 'Webinar Bedah Landing Page CRO Specialist (Rp79.000)';
 
-        // Split name into first and last name
+        // Split name
         $nameParts = explode(' ', $customerName, 2);
         $firstName = $nameParts[0] ?? 'Customer';
-        $lastName = $nameParts[1] ?? $firstName;
+        $lastName = $nameParts[1] ?? '';
         
         $appUrl = rtrim(env('APP_URL') ?: (config('app.url') ?: 'https://pbm-dun.vercel.app'), '/');
         $callbackUrl = $appUrl . '/payment/duitku/callback';
         $returnUrl = $appUrl . '/payment/duitku/finish';
 
-        // 1. Duitku POP Headers: Timestamp in milliseconds & HMAC-SHA256 signature
-        $timestamp = (string) round(microtime(true) * 1000);
-        $stringToSign = $merchantCode . $timestamp;
+        // --- Duitku API v2 Signature ---
+        // Formula: hash_hmac('sha256', merchantCode + merchantOrderId + paymentAmount + apiKey, apiKey)
+        $stringToSign = $merchantCode . $merchantOrderId . $paymentAmount . $apiKey;
         $signature = hash_hmac('sha256', $stringToSign, $apiKey);
 
-        $headers = [
-            'Content-Type' => 'application/json',
-            'x-duitku-signature' => $signature,
-            'x-duitku-timestamp' => $timestamp,
-            'x-duitku-merchantcode' => $merchantCode,
-        ];
-
-        // 2. Duitku POP Request Body
+        // --- Duitku API v2 Request Body ---
         $payload = [
+            'merchantCode' => $merchantCode,
             'paymentAmount' => $paymentAmount,
-            'merchantOrderId' => (string) $merchantOrderId,
+            'paymentMethod' => '',  // Empty = show all payment methods
+            'merchantOrderId' => $merchantOrderId,
             'productDetails' => $productDetails,
             'additionalParam' => '',
             'merchantUserInfo' => '',
-            'paymentMethod' => '',
             'customerVaName' => substr($customerName, 0, 20),
             'email' => $email,
             'phoneNumber' => $phoneNumber,
@@ -103,52 +110,58 @@ class DuitkuService
             ],
             'callbackUrl' => $callbackUrl,
             'returnUrl' => $returnUrl,
-            'expiryPeriod' => 1440, // 24 hours
+            'signature' => $signature,
+            'expiryPeriod' => 1440, // 24 hours in minutes
         ];
 
-        // Endpoints to try (Production first, fallback to Sandbox or vice-versa)
-        $isExplicitSandbox = str_starts_with(strtoupper($merchantCode), 'DS') || env('DUITKU_ENV') === 'sandbox';
+        Log::info('Duitku v2 Request', [
+            'merchantCode' => $merchantCode,
+            'merchantOrderId' => $merchantOrderId,
+            'paymentAmount' => $paymentAmount,
+            'signature' => $signature,
+            'callbackUrl' => $callbackUrl,
+            'returnUrl' => $returnUrl,
+        ]);
+
+        // Determine endpoints based on merchant code prefix
+        $isExplicitSandbox = str_starts_with(strtoupper($merchantCode), 'DS') 
+            || (config('services.duitku.env') ?: env('DUITKU_ENV')) === 'sandbox';
         
         $endpoints = $isExplicitSandbox
             ? [
-                'https://api-sandbox.duitku.com/api/merchant/createInvoice',
-                'https://api-prod.duitku.com/api/merchant/createInvoice',
                 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
             ]
             : [
-                'https://api-prod.duitku.com/api/merchant/createInvoice',
-                'https://api-sandbox.duitku.com/api/merchant/createInvoice',
                 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
             ];
 
         foreach ($endpoints as $url) {
             try {
-                // If endpoint is legacy v2 inquiry, adjust signature to v2 style
-                if (str_contains($url, '/v2/inquiry')) {
-                    $v2Signature = hash_hmac('sha256', $merchantCode . $merchantOrderId . $paymentAmount, $apiKey);
-                    $v2Payload = array_merge($payload, [
-                        'merchantCode' => $merchantCode,
-                        'signature' => $v2Signature,
-                    ]);
-                    $response = Http::timeout(10)->post($url, $v2Payload);
-                } else {
-                    // Duitku POP createInvoice API with x-duitku-* headers
-                    $response = Http::timeout(10)->withHeaders($headers)->post($url, $payload);
+                $response = Http::timeout(15)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post($url, $payload);
+
+                $httpCode = $response->status();
+                $data = $response->json();
+
+                Log::info("Duitku v2 Response from {$url}", [
+                    'httpCode' => $httpCode,
+                    'response' => $data,
+                ]);
+
+                if ($response->successful() && isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
+                    Log::info("Duitku Payment URL created: {$data['paymentUrl']} (reference: {$data['reference']})");
+                    $this->lastError = null;
+                    return $data['paymentUrl'];
                 }
 
-                if ($response->successful()) {
-                    $data = $response->json();
-                    if (isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
-                        Log::info("Duitku POP Payment URL created successfully via {$url} for {$merchantOrderId}: " . $data['paymentUrl']);
-                        $this->lastError = null;
-                        return $data['paymentUrl'];
-                    }
-                    $this->lastError = 'Duitku Response: ' . ($data['statusMessage'] ?? json_encode($data));
-                    Log::warning($this->lastError, ['endpoint' => $url, 'response' => $data]);
-                } else {
-                    $this->lastError = "HTTP {$response->status()} from {$url}: " . $response->body();
-                    Log::warning($this->lastError);
-                }
+                $this->lastError = "HTTP {$httpCode} from {$url}: " . ($data['statusMessage'] ?? $response->body());
+                Log::warning($this->lastError);
+
             } catch (\Throwable $e) {
                 $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
                 Log::error($this->lastError);
