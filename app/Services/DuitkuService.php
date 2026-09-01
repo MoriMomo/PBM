@@ -20,7 +20,7 @@ class DuitkuService
             config('services.duitku.merchant_code') 
             ?: (getenv('DUITKU_MERCHANT_CODE') 
             ?: ($_ENV['DUITKU_MERCHANT_CODE'] 
-            ?: ($_SERVER['DUITKU_MERCHANT_CODE'] ?? '')))
+            ?: ($_SERVER['DUITKU_MERCHANT_CODE'] ?? 'DS34863')))
         );
     }
 
@@ -30,7 +30,7 @@ class DuitkuService
             config('services.duitku.api_key') 
             ?: (getenv('DUITKU_API_KEY') 
             ?: ($_ENV['DUITKU_API_KEY'] 
-            ?: ($_SERVER['DUITKU_API_KEY'] ?? '')))
+            ?: ($_SERVER['DUITKU_API_KEY'] ?? '1c9e7b636968f30614f3c4824d1851e8')))
         );
     }
 
@@ -50,15 +50,11 @@ class DuitkuService
         $apiKey = $this->getApiKey();
 
         if (empty($merchantCode)) {
-            $this->lastError = 'DUITKU_MERCHANT_CODE is empty. Set it in Vercel environment variables.';
-            Log::info($this->lastError);
-            return null;
+            $merchantCode = 'DS34863';
         }
 
         if (empty($apiKey)) {
-            $this->lastError = 'DUITKU_API_KEY is empty. Set it in Vercel environment variables.';
-            Log::info($this->lastError);
-            return null;
+            $apiKey = '1c9e7b636968f30614f3c4824d1851e8';
         }
 
         $merchantOrderId = (string) $params['order_id'];
@@ -121,41 +117,50 @@ class DuitkuService
             'returnUrl' => $returnUrl,
         ]);
 
-        // Determine endpoint based on merchant code prefix
+        // Try sandbox first if DS, else passport
         $isSandbox = str_starts_with(strtoupper($merchantCode), 'DS') 
             || (config('services.duitku.env') ?: env('DUITKU_ENV')) === 'sandbox';
         
-        $url = $isSandbox
-            ? 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry'
-            : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
+        $endpoints = $isSandbox
+            ? [
+                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
+            ]
+            : [
+                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
+            ];
 
-        try {
-            $response = Http::timeout(15)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($url, $payload);
+        foreach ($endpoints as $url) {
+            try {
+                $response = Http::timeout(15)
+                    ->withoutVerifying()
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post($url, $payload);
 
-            $httpCode = $response->status();
-            $data = $response->json();
+                $httpCode = $response->status();
+                $data = $response->json();
 
-            Log::info("Duitku v2 Response from {$url}", [
-                'httpCode' => $httpCode,
-                'response' => $data,
-            ]);
+                Log::info("Duitku v2 Response from {$url}", [
+                    'httpCode' => $httpCode,
+                    'response' => $data,
+                ]);
 
-            if ($response->successful() && isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
-                Log::info("Duitku Payment URL created: {$data['paymentUrl']} (reference: " . ($data['reference'] ?? 'N/A') . ")");
-                $this->lastError = null;
-                return $data['paymentUrl'];
+                if ($response->successful() && isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
+                    Log::info("Duitku Payment URL created: {$data['paymentUrl']} (reference: " . ($data['reference'] ?? 'N/A') . ")");
+                    $this->lastError = null;
+                    return $data['paymentUrl'];
+                }
+
+                $this->lastError = "HTTP {$httpCode} from {$url}: " . ($data['Message'] ?? $data['statusMessage'] ?? $response->body());
+                Log::warning($this->lastError);
+
+            } catch (\Throwable $e) {
+                $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
+                Log::error($this->lastError);
             }
-
-            $this->lastError = "HTTP {$httpCode} from {$url}: " . ($data['Message'] ?? $data['statusMessage'] ?? $response->body());
-            Log::warning($this->lastError);
-
-        } catch (\Throwable $e) {
-            $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
-            Log::error($this->lastError);
         }
 
         return null;

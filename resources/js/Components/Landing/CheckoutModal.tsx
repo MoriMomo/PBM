@@ -68,7 +68,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       }
     } catch (err: any) {
       console.error('Registration failed:', err);
-      setErrorMsg(err.response?.data?.message || 'Gagal menyimpan data pendaftaran. Silakan periksa kembali data Anda.');
+      const specificError = err.response?.data?.duitku_error;
+      const genericError = err.response?.data?.message;
+      setErrorMsg(specificError ? `${genericError || 'Gagal'}: ${specificError}` : (genericError || 'Gagal menyimpan data pendaftaran. Silakan periksa kembali data Anda.'));
     } finally {
       setLoading(false);
     }
