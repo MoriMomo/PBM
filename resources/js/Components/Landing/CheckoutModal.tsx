@@ -103,7 +103,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             Lengkapi Data Pendaftaran
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Isi data di bawah ini untuk mendapatkan akses Live Zoom & rekaman webinar.
+            Isi data di bawah ini untuk mendapatkan akses Live Zoom & pembayaran resmi Duitku.
           </p>
         </div>
 
@@ -197,7 +197,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Memproses Pendaftaran...</span>
+                <span>Menghubungkan ke Duitku...</span>
               </>
             ) : (
               <>
@@ -211,7 +211,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         {/* Security Footer */}
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-mono text-slate-400">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Data Terenkripsi • Terhubung Langsung ke WA Admin Official</span>
+          <span>Data Terenkripsi 256-bit • Duitku Payment Gateway (QRIS, VA Bank, E-Wallet)</span>
         </div>
       </div>
     </div>
