@@ -1,9 +1,10 @@
 <?php
 
-// Setup necessary writable directories in /tmp for Vercel serverless environment
+// 1. Setup necessary writable directories in /tmp for Vercel serverless environment
 $storageDirs = [
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache',
+    '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/logs',
     '/tmp/database',
@@ -11,15 +12,15 @@ $storageDirs = [
 
 foreach ($storageDirs as $dir) {
     if (!is_dir($dir)) {
-        @mkdir($dir, 0755, true);
+        @mkdir($dir, 0777, true);
     }
 }
 
-// Copy SQLite database to writable /tmp if using local SQLite database
+// 2. Setup SQLite database file in writable /tmp
 $sqliteFile = '/tmp/database/database.sqlite';
 if (!file_exists($sqliteFile)) {
     $sourceDb = __DIR__ . '/../database/database.sqlite';
-    if (file_exists($sourceDb)) {
+    if (file_exists($sourceDb) && filesize($sourceDb) > 0) {
         @copy($sourceDb, $sqliteFile);
     } else {
         @touch($sqliteFile);
@@ -32,4 +33,5 @@ if (!getenv('DB_DATABASE') || getenv('DB_CONNECTION') === 'sqlite') {
     $_SERVER['DB_DATABASE'] = $sqliteFile;
 }
 
+// 3. Forward request to Laravel public/index.php
 require __DIR__ . '/../public/index.php';
