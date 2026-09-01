@@ -40,9 +40,8 @@ class DuitkuController extends Controller
         ]);
 
         // Verify Duitku API v2 callback signature
-        // Formula: hash_hmac('sha256', merchantCode + amount + merchantOrderId + apiKey, apiKey)
-        $stringToSign = $merchantCode . $amount . $merchantOrderId . $apiKey;
-        $calcSignature = hash_hmac('sha256', $stringToSign, $apiKey);
+        // Callback signature: md5(merchantCode + amount + merchantOrderId + apiKey)
+        $calcSignature = md5($merchantCode . $amount . $merchantOrderId . $apiKey);
 
         if ($signature && $signature !== $calcSignature) {
             Log::warning('Duitku callback signature mismatch', [

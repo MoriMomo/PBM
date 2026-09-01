@@ -41,9 +41,8 @@ class DuitkuService
      * Endpoint Production: https://passport.duitku.com/webapi/api/merchant/v2/inquiry
      * Endpoint Sandbox:    https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry
      *
-     * Signature formula:
-     *   $stringToSign = $merchantCode . $merchantOrderId . $paymentAmount . $apiKey;
-     *   $signature = hash_hmac('sha256', $stringToSign, $apiKey);
+     * Signature formula (VERIFIED WORKING):
+     *   $signature = md5($merchantCode . $merchantOrderId . $paymentAmount . $apiKey);
      */
     public function createInvoice(array $params): ?string
     {
@@ -78,16 +77,15 @@ class DuitkuService
         $callbackUrl = $appUrl . '/payment/duitku/callback';
         $returnUrl = $appUrl . '/payment/duitku/finish';
 
-        // --- Duitku API v2 Signature ---
-        // Formula: hash_hmac('sha256', merchantCode + merchantOrderId + paymentAmount + apiKey, apiKey)
-        $stringToSign = $merchantCode . $merchantOrderId . $paymentAmount . $apiKey;
-        $signature = hash_hmac('sha256', $stringToSign, $apiKey);
+        // --- Duitku API v2 Signature (MD5) ---
+        // Formula: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
+        $signature = md5($merchantCode . $merchantOrderId . $paymentAmount . $apiKey);
 
         // --- Duitku API v2 Request Body ---
         $payload = [
             'merchantCode' => $merchantCode,
             'paymentAmount' => $paymentAmount,
-            'paymentMethod' => '',  // Empty = show all payment methods
+            'paymentMethod' => 'VC',
             'merchantOrderId' => $merchantOrderId,
             'productDetails' => $productDetails,
             'additionalParam' => '',
@@ -123,49 +121,41 @@ class DuitkuService
             'returnUrl' => $returnUrl,
         ]);
 
-        // Determine endpoints based on merchant code prefix
-        $isExplicitSandbox = str_starts_with(strtoupper($merchantCode), 'DS') 
+        // Determine endpoint based on merchant code prefix
+        $isSandbox = str_starts_with(strtoupper($merchantCode), 'DS') 
             || (config('services.duitku.env') ?: env('DUITKU_ENV')) === 'sandbox';
         
-        $endpoints = $isExplicitSandbox
-            ? [
-                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
-                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
-            ]
-            : [
-                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
-                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
-            ];
+        $url = $isSandbox
+            ? 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry'
+            : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
 
-        foreach ($endpoints as $url) {
-            try {
-                $response = Http::timeout(15)
-                    ->withHeaders([
-                        'Content-Type' => 'application/json',
-                    ])
-                    ->post($url, $payload);
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, $payload);
 
-                $httpCode = $response->status();
-                $data = $response->json();
+            $httpCode = $response->status();
+            $data = $response->json();
 
-                Log::info("Duitku v2 Response from {$url}", [
-                    'httpCode' => $httpCode,
-                    'response' => $data,
-                ]);
+            Log::info("Duitku v2 Response from {$url}", [
+                'httpCode' => $httpCode,
+                'response' => $data,
+            ]);
 
-                if ($response->successful() && isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
-                    Log::info("Duitku Payment URL created: {$data['paymentUrl']} (reference: {$data['reference']})");
-                    $this->lastError = null;
-                    return $data['paymentUrl'];
-                }
-
-                $this->lastError = "HTTP {$httpCode} from {$url}: " . ($data['statusMessage'] ?? $response->body());
-                Log::warning($this->lastError);
-
-            } catch (\Throwable $e) {
-                $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
-                Log::error($this->lastError);
+            if ($response->successful() && isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
+                Log::info("Duitku Payment URL created: {$data['paymentUrl']} (reference: " . ($data['reference'] ?? 'N/A') . ")");
+                $this->lastError = null;
+                return $data['paymentUrl'];
             }
+
+            $this->lastError = "HTTP {$httpCode} from {$url}: " . ($data['Message'] ?? $data['statusMessage'] ?? $response->body());
+            Log::warning($this->lastError);
+
+        } catch (\Throwable $e) {
+            $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
+            Log::error($this->lastError);
         }
 
         return null;
