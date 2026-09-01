@@ -33,5 +33,11 @@ if (!getenv('DB_DATABASE') || getenv('DB_CONNECTION') === 'sqlite') {
     $_SERVER['DB_DATABASE'] = $sqliteFile;
 }
 
-// 3. Forward request to Laravel public/index.php
+// 3. Ensure HTTPS is recognized behind Vercel SSL proxy
+if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') || isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || is_dir('/tmp')) {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = 443;
+}
+
+// 4. Forward request to Laravel public/index.php
 require __DIR__ . '/../public/index.php';
