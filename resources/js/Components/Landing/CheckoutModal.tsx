@@ -47,15 +47,17 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         whatsapp,
       });
 
-      if (response.data?.success && response.data?.whatsapp_url) {
+      const redirectUrl = response.data?.redirect_url || response.data?.payment_url || response.data?.whatsapp_url;
+
+      if (response.data?.success && redirectUrl) {
         // Track first-party conversion event
         trackEvent({
           event_type: 'conversion',
           location_id: 'checkout_modal',
         });
 
-        // Redirect to WhatsApp Admin
-        window.open(response.data.whatsapp_url, '_blank');
+        // Redirect to Duitku payment page or WhatsApp fallback
+        window.location.href = redirectUrl;
         onClose();
         // Reset form
         setName('');
@@ -199,7 +201,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               </>
             ) : (
               <>
-                <span>Lanjutkan ke WA Admin (Rp79.000)</span>
+                <span>Lanjut ke Pembayaran (Rp79.000)</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}

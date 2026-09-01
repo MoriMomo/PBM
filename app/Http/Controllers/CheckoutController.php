@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\DuitkuService;
 use App\Services\MetaCapiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -10,14 +11,16 @@ use Illuminate\Support\Str;
 class CheckoutController extends Controller
 {
     protected MetaCapiService $capiService;
+    protected DuitkuService $duitkuService;
 
-    public function __construct(MetaCapiService $capiService)
+    public function __construct(MetaCapiService $capiService, DuitkuService $duitkuService)
     {
         $this->capiService = $capiService;
+        $this->duitkuService = $duitkuService;
     }
 
     /**
-     * Store new webinar registration & generate WhatsApp redirect URL.
+     * Store new webinar registration & generate Payment / WhatsApp redirect URL.
      */
     public function register(Request $request)
     {
@@ -76,22 +79,32 @@ class CheckoutController extends Controller
             'content_name' => 'Webinar Registration',
         ], 'lead_'.$order->id, $userData);
 
-        // Build Admin WhatsApp Redirect Message
-        $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '628111040342');
+        // 1. Try generating Duitku Payment Gateway Invoice URL
+        $paymentUrl = $this->duitkuService->createInvoice([
+            'order_id' => $orderNumber,
+            'amount' => 79000,
+            'name' => $order->name,
+            'email' => $order->email,
+            'phone' => $order->whatsapp,
+            'product_name' => 'Webinar Bedah Landing Page CRO Specialist (Rp79.000)',
+        ]);
 
+        // 2. Build Admin WhatsApp Redirect Message as fallback
+        $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '628111040342');
         $message = 'Halo Admin PBM Agency, saya *'.$order->name.'* ('.$order->email.") mau konfirmasi pendaftaran Webinar Bedah Landing Page (Rp79.000).\n\n"
             .'📋 *Kode Order*: '.$orderNumber."\n"
             .'📱 *WhatsApp*: '.$phone."\n"
             ."💰 *Total Investasi*: Rp79.000\n\n"
             .'Mohon info instruksi pembayaran QRIS / Rekening Bank. Terima kasih!';
-
         $whatsappUrl = "https://api.whatsapp.com/send?phone={$adminPhone}&text=".urlencode($message);
 
         return response()->json([
             'success' => true,
-            'message' => 'Pendaftaran berhasil! Mengalihkan Anda ke WhatsApp Admin...',
+            'message' => 'Pendaftaran berhasil! Mengalihkan ke pembayaran...',
             'order' => $order,
+            'payment_url' => $paymentUrl,
             'whatsapp_url' => $whatsappUrl,
+            'redirect_url' => $paymentUrl ?? $whatsappUrl,
         ]);
     }
 }
