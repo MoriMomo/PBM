@@ -22,9 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         if (!app()->runningUnitTests()) {
-            // Ubah validateCsrfTokens menjadi preventRequestForgery
+            // Exclude webhook and callback endpoints from CSRF
             $middleware->preventRequestForgery(except: [
                 'analytics/track',
+                'payment/*',
+                'payment/duitku/callback',
             ]);
         }
     })

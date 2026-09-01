@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DuitkuController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,10 @@ Route::post('/analytics/track', [AnalyticsController::class, 'track'])->name('an
 
 // Checkout Registration endpoint (public)
 Route::post('/checkout/register', [CheckoutController::class, 'register'])->name('checkout.register');
+
+// Duitku Payment Gateway Callbacks
+Route::post('/payment/duitku/callback', [DuitkuController::class, 'callback'])->name('payment.duitku.callback');
+Route::get('/payment/duitku/finish', [DuitkuController::class, 'finish'])->name('payment.duitku.finish');
 
 // Admin Analytics & A/B Testing Labs Dashboard
 Route::prefix('admin')->group(function () {
