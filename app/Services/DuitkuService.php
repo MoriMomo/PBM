@@ -24,12 +24,12 @@ class DuitkuService
     }
 
     /**
-     * Create Invoice / Payment URL with Duitku
+     * Create Invoice / Payment URL with Duitku API v2
      */
     public function createInvoice(array $params): ?string
     {
         if (empty($this->merchantCode) || empty($this->apiKey)) {
-            Log::warning('Duitku credentials missing: merchant code or API key not set.');
+            Log::info('Duitku merchant code not set, falling back to WhatsApp flow.');
             return null;
         }
 
@@ -38,13 +38,15 @@ class DuitkuService
         $email = $params['email'];
         $phoneNumber = $params['phone'];
         $customerName = $params['name'];
-        $productDetails = $params['product_name'] ?? 'Webinar PBM Agency';
+        $productDetails = $params['product_name'] ?? 'Webinar Bedah Landing Page CRO Specialist (Rp79.000)';
         
-        $callbackUrl = env('APP_URL') . '/payment/duitku/callback';
-        $returnUrl = env('APP_URL') . '/payment/duitku/finish';
+        $appUrl = rtrim(env('APP_URL', 'https://pbm-dun.vercel.app'), '/');
+        $callbackUrl = $appUrl . '/payment/duitku/callback';
+        $returnUrl = $appUrl . '/payment/duitku/finish';
 
-        // Signature format: MD5(merchantCode + merchantOrderId + paymentAmount + apiKey)
-        $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
+        // Official Duitku v2 Signature: HMAC-SHA256(merchantCode + merchantOrderId + paymentAmount, apiKey)
+        $stringToSign = $this->merchantCode . $merchantOrderId . $paymentAmount;
+        $signature = hash_hmac('sha256', $stringToSign, $this->apiKey);
 
         $payload = [
             'merchantCode' => $this->merchantCode,
@@ -53,17 +55,22 @@ class DuitkuService
             'productDetails' => $productDetails,
             'email' => $email,
             'phoneNumber' => $phoneNumber,
-            'customerVaName' => $customerName,
+            'customerVaName' => substr($customerName, 0, 20),
             'callbackUrl' => $callbackUrl,
             'returnUrl' => $returnUrl,
             'signature' => $signature,
             'expiryPeriod' => 1440, // 24 hours
             'itemDetails' => [
                 [
-                    'name' => $productDetails,
+                    'name' => substr($productDetails, 0, 50),
                     'price' => $paymentAmount,
                     'quantity' => 1,
                 ]
+            ],
+            'customerDetail' => [
+                'firstName' => $customerName,
+                'email' => $email,
+                'phoneNumber' => $phoneNumber,
             ],
         ];
 
@@ -73,13 +80,14 @@ class DuitkuService
             if ($response->successful()) {
                 $data = $response->json();
                 if (isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
+                    Log::info("Duitku Payment URL created successfully for {$merchantOrderId}: " . $data['paymentUrl']);
                     return $data['paymentUrl'];
                 }
-                Log::warning('Duitku response missing paymentUrl', ['response' => $data]);
+                Log::warning('Duitku response status: ' . ($data['statusMessage'] ?? 'Unknown error'), ['response' => $data]);
             } else {
-                Log::error('Duitku API HTTP error', ['status' => $response->status(), 'body' => $response->body()]);
+                Log::error('Duitku HTTP error (' . $response->status() . '): ' . $response->body());
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Duitku createInvoice exception: ' . $e->getMessage());
         }
 

@@ -14,16 +14,16 @@ class DuitkuController extends Controller
      */
     public function callback(Request $request): JsonResponse
     {
-        $apiKey = env('DUITKU_API_KEY', '');
+        $apiKey = env('DUITKU_API_KEY', '1c9e7b636968f30614f3c4824d1851e8');
         $merchantCode = $request->input('merchantCode');
         $amount = $request->input('amount');
         $merchantOrderId = $request->input('merchantOrderId');
         $signature = $request->input('signature');
         $resultCode = $request->input('resultCode');
 
-        // Verify Duitku signature: MD5(merchantCode + amount + merchantOrderId + apiKey)
-        $params = $merchantCode . $amount . $merchantOrderId . $apiKey;
-        $calcSignature = md5($params);
+        // Verify Duitku v2 signature: HMAC-SHA256(merchantCode + amount + merchantOrderId, apiKey)
+        $stringToSign = $merchantCode . $amount . $merchantOrderId;
+        $calcSignature = hash_hmac('sha256', $stringToSign, $apiKey);
 
         if ($signature && $signature !== $calcSignature) {
             Log::warning('Duitku callback signature mismatch', ['received' => $signature, 'calculated' => $calcSignature]);
