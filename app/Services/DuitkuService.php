@@ -7,20 +7,31 @@ use Illuminate\Support\Facades\Log;
 
 class DuitkuService
 {
-    protected string $merchantCode;
-    protected string $apiKey;
-    protected string $mode;
-    protected string $baseUrl;
+    protected ?string $lastError = null;
 
-    public function __construct()
+    public function getLastError(): ?string
     {
-        $this->merchantCode = env('DUITKU_MERCHANT_CODE', '');
-        $this->apiKey = env('DUITKU_API_KEY', '1c9e7b636968f30614f3c4824d1851e8');
-        $this->mode = env('DUITKU_ENV', 'production'); // 'sandbox' or 'production'
+        return $this->lastError;
+    }
 
-        $this->baseUrl = $this->mode === 'sandbox'
-            ? 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry'
-            : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
+    protected function getMerchantCode(): string
+    {
+        return trim(
+            config('services.duitku.merchant_code') 
+            ?: (getenv('DUITKU_MERCHANT_CODE') 
+            ?: ($_ENV['DUITKU_MERCHANT_CODE'] 
+            ?: ($_SERVER['DUITKU_MERCHANT_CODE'] ?? '')))
+        );
+    }
+
+    protected function getApiKey(): string
+    {
+        return trim(
+            config('services.duitku.api_key') 
+            ?: (getenv('DUITKU_API_KEY') 
+            ?: ($_ENV['DUITKU_API_KEY'] 
+            ?: ($_SERVER['DUITKU_API_KEY'] ?? '1c9e7b636968f30614f3c4824d1851e8')))
+        );
     }
 
     /**
@@ -28,28 +39,32 @@ class DuitkuService
      */
     public function createInvoice(array $params): ?string
     {
-        if (empty($this->merchantCode) || empty($this->apiKey)) {
-            Log::info('Duitku merchant code not set, falling back to WhatsApp flow.');
+        $merchantCode = $this->getMerchantCode();
+        $apiKey = $this->getApiKey();
+
+        if (empty($merchantCode)) {
+            $this->lastError = 'DUITKU_MERCHANT_CODE is empty in environment variables.';
+            Log::info($this->lastError);
             return null;
         }
 
         $merchantOrderId = $params['order_id'];
         $paymentAmount = (int) $params['amount'];
-        $email = $params['email'];
-        $phoneNumber = $params['phone'];
-        $customerName = $params['name'];
+        $email = trim($params['email']);
+        $phoneNumber = trim($params['phone']);
+        $customerName = trim($params['name']);
         $productDetails = $params['product_name'] ?? 'Webinar Bedah Landing Page CRO Specialist (Rp79.000)';
         
-        $appUrl = rtrim(env('APP_URL', 'https://pbm-dun.vercel.app'), '/');
+        $appUrl = rtrim(env('APP_URL') ?: (config('app.url') ?: 'https://pbm-dun.vercel.app'), '/');
         $callbackUrl = $appUrl . '/payment/duitku/callback';
         $returnUrl = $appUrl . '/payment/duitku/finish';
 
         // Official Duitku v2 Signature: HMAC-SHA256(merchantCode + merchantOrderId + paymentAmount, apiKey)
-        $stringToSign = $this->merchantCode . $merchantOrderId . $paymentAmount;
-        $signature = hash_hmac('sha256', $stringToSign, $this->apiKey);
+        $stringToSign = $merchantCode . $merchantOrderId . $paymentAmount;
+        $signature = hash_hmac('sha256', $stringToSign, $apiKey);
 
         $payload = [
-            'merchantCode' => $this->merchantCode,
+            'merchantCode' => $merchantCode,
             'paymentAmount' => $paymentAmount,
             'merchantOrderId' => $merchantOrderId,
             'productDetails' => $productDetails,
@@ -74,21 +89,39 @@ class DuitkuService
             ],
         ];
 
-        try {
-            $response = Http::timeout(10)->post($this->baseUrl, $payload);
+        // Endpoints to try (Production & Sandbox)
+        $isExplicitSandbox = str_starts_with(strtoupper($merchantCode), 'DS') || env('DUITKU_ENV') === 'sandbox';
+        $endpoints = $isExplicitSandbox
+            ? [
+                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
+            ]
+            : [
+                'https://passport.duitku.com/webapi/api/merchant/v2/inquiry',
+                'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry',
+            ];
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if (isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
-                    Log::info("Duitku Payment URL created successfully for {$merchantOrderId}: " . $data['paymentUrl']);
-                    return $data['paymentUrl'];
+        foreach ($endpoints as $url) {
+            try {
+                $response = Http::timeout(10)->post($url, $payload);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (isset($data['paymentUrl']) && !empty($data['paymentUrl'])) {
+                        Log::info("Duitku Payment URL created successfully via {$url} for {$merchantOrderId}: " . $data['paymentUrl']);
+                        $this->lastError = null;
+                        return $data['paymentUrl'];
+                    }
+                    $this->lastError = 'Duitku Response: ' . ($data['statusMessage'] ?? json_encode($data));
+                    Log::warning($this->lastError, ['endpoint' => $url, 'response' => $data]);
+                } else {
+                    $this->lastError = "HTTP {$response->status()} from {$url}: " . $response->body();
+                    Log::warning($this->lastError);
                 }
-                Log::warning('Duitku response status: ' . ($data['statusMessage'] ?? 'Unknown error'), ['response' => $data]);
-            } else {
-                Log::error('Duitku HTTP error (' . $response->status() . '): ' . $response->body());
+            } catch (\Throwable $e) {
+                $this->lastError = "Exception connecting to {$url}: " . $e->getMessage();
+                Log::error($this->lastError);
             }
-        } catch (\Throwable $e) {
-            Log::error('Duitku createInvoice exception: ' . $e->getMessage());
         }
 
         return null;

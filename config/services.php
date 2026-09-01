@@ -44,4 +44,10 @@ return [
         'whatsapp' => env('ADMIN_WHATSAPP_NUMBER', '628111040342'),
     ],
 
+    'duitku' => [
+        'merchant_code' => env('DUITKU_MERCHANT_CODE', ''),
+        'api_key' => env('DUITKU_API_KEY', '1c9e7b636968f30614f3c4824d1851e8'),
+        'env' => env('DUITKU_ENV', 'production'),
+    ],
+
 ];

@@ -131,6 +131,7 @@ class CheckoutController extends Controller
             'payment_url' => $paymentUrl,
             'whatsapp_url' => $whatsappUrl,
             'redirect_url' => $paymentUrl ?? $whatsappUrl,
+            'duitku_error' => $this->duitkuService->getLastError(),
         ]);
     }
 }
