@@ -47,7 +47,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         whatsapp,
       });
 
-      const redirectUrl = response.data?.redirect_url || response.data?.payment_url || response.data?.whatsapp_url;
+      const redirectUrl = response.data?.redirect_url || response.data?.payment_url;
 
       if (response.data?.success && redirectUrl) {
         // Track first-party conversion event
@@ -56,7 +56,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           location_id: 'checkout_modal',
         });
 
-        // Redirect to Duitku payment page or WhatsApp fallback
+        // Redirect to Duitku payment page
         window.location.href = redirectUrl;
         onClose();
         // Reset form

@@ -99,7 +99,7 @@ class CheckoutController extends Controller
             Log::warning('CAPI tracking in CheckoutController failed: ' . $e->getMessage());
         }
 
-        // 1. Try generating Duitku Payment Gateway Invoice URL
+        // Generate Duitku Payment Gateway Invoice URL
         $paymentUrl = null;
         try {
             $paymentUrl = $this->duitkuService->createInvoice([
@@ -114,24 +114,21 @@ class CheckoutController extends Controller
             Log::error('Duitku createInvoice error: ' . $e->getMessage());
         }
 
-        // 2. Build Admin WhatsApp Redirect Message as fallback
-        $adminPhone = config('services.admin.whatsapp') ?? env('ADMIN_WHATSAPP_NUMBER', '628111040342');
-        $message = 'Halo Admin PBM Agency, saya *'.trim($validated['name']).'* ('.strtolower(trim($validated['email'])).") mau konfirmasi pendaftaran Webinar Bedah Landing Page (Rp79.000).\n\n"
-            .'📋 *Kode Order*: '.$orderNumber."\n"
-            .'📱 *WhatsApp*: '.$phone."\n"
-            ."💰 *Total Investasi*: Rp79.000\n\n"
-            .'Mohon info instruksi pembayaran QRIS / Rekening Bank. Terima kasih!';
-        $whatsappUrl = "https://api.whatsapp.com/send?phone={$adminPhone}&text=".urlencode($message);
+        if (!$paymentUrl) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat link pembayaran. Silakan coba lagi.',
+                'duitku_error' => $this->duitkuService->getLastError(),
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Pendaftaran berhasil! Mengalihkan ke pembayaran...',
+            'message' => 'Pendaftaran berhasil! Mengalihkan ke pembayaran Duitku...',
             'order' => $order,
             'order_number' => $orderNumber,
             'payment_url' => $paymentUrl,
-            'whatsapp_url' => $whatsappUrl,
-            'redirect_url' => $paymentUrl ?? $whatsappUrl,
-            'duitku_error' => $this->duitkuService->getLastError(),
+            'redirect_url' => $paymentUrl,
         ]);
     }
 }
