@@ -37,19 +37,7 @@ export const useAnalytics = () => {
     const eventId = 'evt_' + Math.random().toString(36).substring(2, 11);
     
     try {
-      // 1. Post event to backend API (async, do not block client-side tracking)
-      axios.post('/analytics/track', {
-        session_id: sessionIdRef.current,
-        event_type: params.event_type,
-        scroll_depth: params.scroll_depth,
-        engagement_time: params.engagement_time,
-        location_id: params.location_id,
-        page_url: window.location.href,
-        event_id: eventId,
-        meta_data: params.meta_data,
-      }).catch(err => console.error('Analytics backend tracking failed:', err));
-
-      // 2. Client-side Meta Pixel dual tracking
+      // Client-side Meta Pixel tracking only (backend tracking removed)
       if (params.event_type === 'visit') {
         trackPixelEvent('PageView', {}, eventId);
       } else if (params.event_type === 'conversion' || (params.event_type === 'cta_click' && params.location_id === 'pricing_cta')) {
@@ -60,7 +48,7 @@ export const useAnalytics = () => {
         }, eventId);
       }
     } catch (error) {
-      console.error('Analytics tracking failed:', error);
+      // ignore
     }
   }, []);
 
